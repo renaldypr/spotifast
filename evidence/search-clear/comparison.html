@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Search clear button centering - Before/After</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font: 15px/1.5 -apple-system, sans-serif; background: #14161a; color: #e8eaed; margin: 0; padding: 32px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .meta { color: #9aa0a6; margin: 0 0 24px; }
+  .meta code { background: #22262c; padding: 1px 6px; border-radius: 4px; }
+  .variant { margin: 0 0 40px; }
+  .variant h2 { font-size: 16px; margin: 0 0 10px; }
+  .toggle { display: inline-flex; border: 1px solid #3a4048; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .toggle button { font: 600 13px/1 -apple-system, sans-serif; padding: 8px 18px; border: 0; background: transparent; color: #9aa0a6; cursor: pointer; }
+  .toggle button.on { background: #2d6a3f; color: #fff; }
+  figure { margin: 0 0 14px; }
+  figcaption { font-size: 12px; color: #9aa0a6; margin-bottom: 6px; }
+  .frame { background: #20242a; border: 1px solid #2c3138; border-radius: 8px; padding: 8px; display: inline-block; max-width: 100%; }
+  .frame img { display: block; max-width: 100%; height: auto; }
+  .zoom img { image-rendering: pixelated; width: 540px; }
+  .strip img { width: 100%; }
+  ul.checks { color: #9aa0a6; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Center the clear glyph in the search pill</h1>
+<p class="meta">Baseline <code>12deee4</code> (before) vs candidate <code>d0ff65c</code> (after).
+Captured with demo mode on macOS, window frame buffer at 2x. Same data, page, state, and
+window size per theme and width; the only change between runs is the commit under test.</p>
+
+<div class="variant" data-v="1280-dark">
+  <h2>Normal window, dark theme (1280 &times; 800)</h2>
+  <div class="toggle"><button class="on" data-show="before">Before</button><button data-show="after">After</button></div>
+  <figure class="zoom"><figcaption>Clear button, 3x pixel zoom</figcaption>
+    <div class="frame"><img class="img-before" src="zoom-before-1280-dark.png" alt="before zoom"><img class="img-after" src="zoom-after-1280-dark.png" alt="after zoom" hidden></div>
+  </figure>
+  <figure class="strip"><figcaption>Full top bar strip</figcaption>
+    <div class="frame"><img class="img-before" src="strip-before-1280-dark.png" alt="before strip"><img class="img-after" src="strip-after-1280-dark.png" alt="after strip" hidden></div>
+  </figure>
+</div>
+
+<div class="variant" data-v="760-dark">
+  <h2>Narrow window, dark theme (760 &times; 600)</h2>
+  <div class="toggle"><button class="on" data-show="before">Before</button><button data-show="after">After</button></div>
+  <figure class="zoom"><figcaption>Clear button, 3x pixel zoom</figcaption>
+    <div class="frame"><img class="img-before" src="zoom-before-760-dark.png" alt="before zoom"><img class="img-after" src="zoom-after-760-dark.png" alt="after zoom" hidden></div>
+  </figure>
+  <figure class="strip"><figcaption>Full top bar strip</figcaption>
+    <div class="frame"><img class="img-before" src="strip-before-760-dark.png" alt="before strip"><img class="img-after" src="strip-after-760-dark.png" alt="after strip" hidden></div>
+  </figure>
+</div>
+
+<div class="variant" data-v="1280-light">
+  <h2>Normal window, light theme (1280 &times; 800)</h2>
+  <div class="toggle"><button class="on" data-show="before">Before</button><button data-show="after">After</button></div>
+  <figure class="zoom"><figcaption>Clear button, 3x pixel zoom</figcaption>
+    <div class="frame"><img class="img-before" src="zoom-before-1280-light.png" alt="before zoom"><img class="img-after" src="zoom-after-1280-light.png" alt="after zoom" hidden></div>
+  </figure>
+  <figure class="strip"><figcaption>Full top bar strip</figcaption>
+    <div class="frame"><img class="img-before" src="strip-before-1280-light.png" alt="before strip"><img class="img-after" src="strip-after-1280-light.png" alt="after strip" hidden></div>
+  </figure>
+</div>
+
+<div class="variant" data-v="760-light">
+  <h2>Narrow window, light theme (760 &times; 600)</h2>
+  <div class="toggle"><button class="on" data-show="before">Before</button><button data-show="after">After</button></div>
+  <figure class="zoom"><figcaption>Clear button, 3x pixel zoom</figcaption>
+    <div class="frame"><img class="img-before" src="zoom-before-760-light.png" alt="before zoom"><img class="img-after" src="zoom-after-760-light.png" alt="after zoom" hidden></div>
+  </figure>
+  <figure class="strip"><figcaption>Full top bar strip</figcaption>
+    <div class="frame"><img class="img-before" src="strip-before-760-light.png" alt="before strip"><img class="img-after" src="strip-after-760-light.png" alt="after strip" hidden></div>
+  </figure>
+</div>
+
+<h2>What changed and why</h2>
+<p>The clear button's box was 24 points wide while <code>theme::icon_button</code>
+allocates its 15-point glyph plus 12 points of padding. egui clamps a centered
+layout that does not fit to the box's top edge, so the glyph landed 1.5 points
+below the pill's midline (and equally right of center). The candidate sizes the
+box to what the button actually allocates. Hit targets are unchanged; only the
+glyph and the button rect move 1.5 points up-left to true center.</p>
+
+<h2>Checks</h2>
+<ul class="checks">
+  <li>Regression test added: <code>the_clear_button_sits_on_the_search_pill_midline</code> (fails on baseline: 18.5 vs 17.0; passes on candidate)</li>
+  <li>fmt, clippy (default and all features), tests (default: 931 passed; all features: 954 passed), doc tests, rustdoc, metainfo and release-name regression scripts: pass locally</li>
+  <li>Launcher packaging script fails on macOS only (GNU <code>install -D</code>); CI runs it on Linux</li>
+  <li>Not covered locally: Linux/Windows builds; CI runs the suite on all three</li>
+</ul>
+
+<script>
+document.querySelectorAll('.variant').forEach(v => {
+  const buttons = v.querySelectorAll('.toggle button');
+  buttons.forEach(b => b.addEventListener('click', () => {
+    buttons.forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    v.querySelectorAll('.img-before').forEach(i => i.hidden = b.dataset.show !== 'before');
+    v.querySelectorAll('.img-after').forEach(i => i.hidden = b.dataset.show !== 'after');
+  }));
+});
+</script>
+</body>
+</html>
